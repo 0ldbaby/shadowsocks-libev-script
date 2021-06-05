@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 ##########################################
 #
-#
 #       针对Centos7+系统，交互式安装！
-#
 #
 ##########################################
 
-# 与用户交互获得ss配置信息
+# 交互获得配置信息
 getSsInfo(){
     ss_method=(
 		"-----Bin-----"
@@ -46,11 +44,13 @@ getSsInfo(){
     ip=`curl -s icanhazip.com`
 }
 
+# 安装shadowsocks-libev所需要的依赖
 installNeed(){
     yum install -y epel-release
     yum install -y git gcc gettext autoconf libtool automake make pcre-devel asciidoc xmlto c-ares-devel libev-devel libsodium-devel mbedtls-devel
 }
 
+# 克隆安装shadowsocks-libev
 installShadowsocks(){
     cd /usr/local/src
     git clone https://github.com/shadowsocks/shadowsocks-libev.git
@@ -62,6 +62,7 @@ installShadowsocks(){
     make install
 }
 
+# 创建shadowsocks-libev启动配置文件以及方便用户查看的信息文件
 createConfig(){
     mkdir -p /etc/shadowsocks-libev
     mkdir -p ~/shadowsocks
@@ -84,6 +85,7 @@ createConfig(){
     echo '#'`curl -s freeapi.ipip.net/$ip` | sed 's/"//g' | sed 's/\[//g' | sed 's/,//g' | sed 's/\]//g' >> ~/shadowsocks/ss.config
 }
 
+# 创建service文件，并添加开机自启
 createStartUp(){
     sed -i 's/ExecStart=\/usr\/bin\/ss-server/ExecStart=\/usr\/local\/bin\/ss-server/g' /usr/local/src/shadowsocks-libev/rpm/SOURCES/systemd/shadowsocks-libev.service
     cp /usr/local/src/shadowsocks-libev/rpm/SOURCES/systemd/shadowsocks-libev.service /usr/lib/systemd/system/
@@ -97,6 +99,7 @@ createStartUp(){
     fi
 }
 
+# 操作防火墙端口 参数1为open是开放操作，其它则为删除操作
 firewall(){
     # 将一个标准错误输出重定向到标准输出 注释:1 可能就是代表 标准输出
     systemctl status firewalld --no-page > /dev/null 2>&1
@@ -106,10 +109,10 @@ firewall(){
         then
             echo "开放端口：$port"
             firewall-cmd --add-port=$port/tcp --permanent
-	    firewall-cmd --add-port=$port/udp --permanent
+	        firewall-cmd --add-port=$port/udp --permanent
         else
             firewall-cmd --remove-port=$oPort/tcp --permanent
-	    firewall-cmd --remove-port=$oPort/udp --permanent
+	        firewall-cmd --remove-port=$oPort/udp --permanent
             echo "删除端口：$oPort"
         fi
     firewall-cmd --reload
@@ -121,16 +124,17 @@ firewall(){
         then
             echo "开放端口：$port"
             iptables -I INPUT -p tcp --dport $port -j ACCEPT
-	    iptables -I INPUT -p udp --dport $port -j ACCEPT
+	        iptables -I INPUT -p udp --dport $port -j ACCEPT
         else
             echo "删除端口：$oPort"
             iptables -D INPUT -p tcp --dport $oPort -j ACCEPT
-	    iptables -D INPUT -p udp --dport $oPort -j ACCEPT
+	        iptables -D INPUT -p udp --dport $oPort -j ACCEPT
         fi
         service iptables save
     fi
 }
 
+# 启动shadowsocks-libev
 startShadowsocks(){
     systemctl start shadowsocks-libev
     if [ $? -eq 0 ]
@@ -141,6 +145,7 @@ startShadowsocks(){
     fi
 }
 
+# 停止shadowsocks-libev
 stopShadowsocks(){
     systemctl stop shadowsocks-libev
     if [ $? -eq 0 ]
@@ -151,6 +156,7 @@ stopShadowsocks(){
     fi
 }
 
+# 卸载shadowsocks-libev，删除一切文件
 uninstallShadowsocks(){
     systemctl disable shadowsocks-libev
     systemctl stop shadowsocks-libev
@@ -168,6 +174,7 @@ uninstallShadowsocks(){
     echo '删除成功'
 }
 
+# 打印配置信息
 printInfo(){
     echo -e '\e[31m 您的ss链接信息如下： \e[0m'
     cat ~/shadowsocks/ss.config
