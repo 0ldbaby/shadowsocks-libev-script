@@ -79,7 +79,7 @@ createConfig(){
     echo "连接端口：$port" >> ~/shadowsocks/ss.config
     echo "连接密码：$password" >> ~/shadowsocks/ss.config
     echo "加密方式：${ss_method[method]}" >> ~/shadowsocks/ss.config
-    echo 'ss链接：↓↓↓↓↓复制下方' >> ~/shadowsocks/ss.config
+    echo 'ss链接：↓↓↓↓↓复制下方到客户端粘贴即可连接' >> ~/shadowsocks/ss.config
     echo -n 'ss://' >> ~/shadowsocks/ss.config
     echo "${ss_method[method]}:$password@$ip:$port" | echo -n `base64` | sed 's/=//g' >> ~/shadowsocks/ss.config
     echo '#'`curl -s freeapi.ipip.net/$ip` | sed 's/"//g' | sed 's/\[//g' | sed 's/,//g' | sed 's/\]//g' >> ~/shadowsocks/ss.config
