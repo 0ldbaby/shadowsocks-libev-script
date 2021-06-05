@@ -26,13 +26,13 @@ getSsInfo(){
 		echo -e "$i：\e[31m ${ss_method[i]} \e[0m"
 	done
     read -p "请选择加密方式(1-9回车默认chacha20)：" method
-	read -p "请输入ss端口号(1024-65535回车默认2437)：" port
+	read -p "请输入ss端口号(1024-65535回车默认12345)：" port
 	read -p "请输入ss密码(回车默认123456)：" password
 	if [ ! -n "$method" ];then
 		method=6
 	fi
 	if [ ! -n "$port" ];then
-		port=2437
+		port=12345
 	fi
 	if [ ! -n "$password" ];then
 		password=123456
