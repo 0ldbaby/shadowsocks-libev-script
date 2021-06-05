@@ -106,8 +106,10 @@ firewall(){
         then
             echo "开放端口：$port"
             firewall-cmd --add-port=$port/tcp --permanent
+	    firewall-cmd --add-port=$port/udp --permanent
         else
             firewall-cmd --remove-port=$oPort/tcp --permanent
+	    firewall-cmd --remove-port=$oPort/udp --permanent
             echo "删除端口：$oPort"
         fi
     firewall-cmd --reload
@@ -119,9 +121,11 @@ firewall(){
         then
             echo "开放端口：$port"
             iptables -I INPUT -p tcp --dport $port -j ACCEPT
+	    iptables -I INPUT -p udp --dport $port -j ACCEPT
         else
             echo "删除端口：$oPort"
             iptables -D INPUT -p tcp --dport $oPort -j ACCEPT
+	    iptables -D INPUT -p udp --dport $oPort -j ACCEPT
         fi
         service iptables save
     fi
